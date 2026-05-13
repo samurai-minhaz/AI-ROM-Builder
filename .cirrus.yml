@@ -1,0 +1,13 @@
+# Optimized Sync for Low Storage (Under 150GB)
+task:
+  name: EvolutionX Build Samurai
+  timeout_in: 120m # Time limit
+  container:
+    image: aosp/build-environment:latest # Build environment
+    cpu: 8
+    memory: 16G
+
+  sync_script:
+    - mkdir -p ~/rom && cd ~/rom
+    - repo init --depth=1 -u https://github.com/Evolution-X/manifest -b udc # Minimal History
+    - repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags # Fast & Slim Sync
