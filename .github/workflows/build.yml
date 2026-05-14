@@ -44,4 +44,10 @@ jobs:
       - name: Run Build
         run: |
           echo "Starting stable build for Realme X2 Pro..."
-          # এখানে পরবর্তীতে আমরা পূর্ণাঙ্গ বিল্ড কমান্ড যোগ করব
+          # এখানে পরবর্তীতে পূর্ণাঙ্গ সোর্স সিঙ্ক এবং বিল্ড কমান্ড যোগ করতে হবে
+          # উদাহরণ:
+          # repo init -u https://github.com/Evolution-X/manifest -b udc
+          # repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+          # source build/envsetup.sh
+          # lunch evolution_samurai-userdebug
+          # mka bacon
