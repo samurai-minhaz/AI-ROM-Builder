@@ -1,69 +1,41 @@
-name: Evolution X Android 16 (Baklava) Build
+name: Evolution X A16 via Crave
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  crave-build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: Checkout Builder
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. Maximize Build Space (Error 28 theke bachte must)
-      - name: Maximize Build Space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 2048
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
-
-      # 2. Cleanup and Setup
-      - name: Setup Build Environment
+      # Crave CLI Install kora
+      - name: Install Crave CLI
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost /usr/local/openjdk*
-          sudo apt update
-          sudo apt install -y bc bison build-essential curl flex g++-multilib gcc-multilib git gnupg gperf libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+          curl -s https://raw.githubusercontent.com/accupara/crave/master/get_crave.sh | bash
+          sudo install crave /usr/local/bin
 
-      # 3. Android 16 Tree Sync (Samurai)
-      - name: Sync Trees
+      # Secret theke config file banano
+      - name: Configure Crave
         run: |
-          git clone https://github.com/samurai-minhaz/android_device_realme_samurai -b main device/realme/samurai
-          git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai
-          git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150
+          mkdir -p ~/.crave
+          echo "${{ secrets.CRAVE_CONF }}" > ~/.crave/crave.conf
 
-      # 4. AI Auto-Patching (A16 Compatibility)
-      - name: AI Auto-Patching Trees
+      # Crave-e Build Run kora
+      - name: Run Build on Crave
         run: |
-          echo "Starting AI-driven file edits for Baklava..."
-          sed -i '$a TARGET_USES_VULKAN := true' device/realme/samurai/BoardConfig.mk
-          sed -i 's/BOARD_KERNEL_PAGESIZE := .*/BOARD_KERNEL_PAGESIZE := 4096/' device/realme/samurai/BoardConfig.mk
-          # AIDL Migration logic
-          sed -i 's/android.hardware.biometrics.fingerprint@2.1/android.hardware.biometrics.fingerprint-service.samurai/g' device/realme/samurai/device.mk
-          # Kernel optimizations
-          echo "CONFIG_SWAP=y" >> kernel/realme/sm8150/arch/arm64/configs/samurai_defconfig
-          echo "CONFIG_ZRAM=y" >> kernel/realme/sm8150/arch/arm64/configs/samurai_defconfig
+          crave run -- "
+            # 1. Repo Setup
+            repo init -u https://github.com/Evolution-X/manifest -b bq2 --git-lfs;
+            
+            # 2. Local Manifest/Trees Clone (Crave server-e)
+            git clone https://github.com/samurai-minhaz/android_device_realme_samurai -b main device/realme/samurai;
+            git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai;
+            git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150;
 
-      # 5. Run Build (Using bq2 branch as per image_8388fe.png)
-      - name: Run Build
-        run: |
-          mkdir -p ~/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-          chmod a+x ~/bin/repo
-          export PATH=~/bin:$PATH
-
-          # Repo Init with bq2 branch and LFS support
-          repo init -u https://github.com/Evolution-X/manifest -b bq2 --depth=1 --git-lfs
-
-          # Optimized Sync
-          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
-
-          # Build Process
-          source build/envsetup.sh
-          lunch evolution_samurai-userdebug
-          m evolution
+            # 3. Sync and Build
+            repo sync -c -j\$(nproc --all) --force-sync --no-clone-bundle --no-tags;
+            source build/envsetup.sh;
+            lunch evolution_samurai-userdebug;
+            m evolution
+          "
