@@ -20,6 +20,27 @@ jobs:
           git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai
           git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150
 
+      - name: AI Auto-Patching Trees
+        run: |
+          echo "Starting AI-driven file edits for Evolution X A16 QPR3..."
+
+          # 1. Device Tree Edits (BoardConfig.mk)
+          # BoardConfig-এ নতুন ফ্ল্যাগ যোগ করা
+          sed -i '$a TARGET_USES_VULKAN := true' device/realme/samurai/BoardConfig.mk
+          sed -i '$a TARGET_USES_HWC2 := true' device/realme/samurai/BoardConfig.mk
+          sed -i 's/BOARD_KERNEL_PAGESIZE := .*/BOARD_KERNEL_PAGESIZE := 4096/' device/realme/samurai/BoardConfig.mk
+
+          # 2. HIDL to AIDL Migration (device.mk)
+          # পুরনো ফিঙ্গারপ্রিন্ট সার্ভিস সরিয়ে নতুন AIDL যোগ করা
+          sed -i 's/android.hardware.biometrics.fingerprint@2.1/android.hardware.biometrics.fingerprint-service.samurai/g' device/realme/samurai/device.mk
+
+          # 3. Kernel Optimization (Memory Management)
+          # কার্নেল লেভেলে Swappiness এবং VRAM টিউন করা
+          echo "CONFIG_SWAP=y" >> kernel/realme/sm8150/arch/arm64/configs/samurai_defconfig
+          echo "CONFIG_ZRAM=y" >> kernel/realme/sm8150/arch/arm64/configs/samurai_defconfig
+
+          echo "All files patched successfully by AI!"
+          
       - name: Run Build
         run: |
           echo "Starting stable build for Realme X2 Pro..."
