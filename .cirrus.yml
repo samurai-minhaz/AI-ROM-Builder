@@ -1,13 +1,33 @@
-# Optimized Sync for Low Storage (Under 150GB)
+env:
+  CIRRUS_CLONE_DEPTH: 1
+
 task:
-  name: EvolutionX Build Samurai
-  timeout_in: 120m # Time limit
+  name: "EvolutionX Build Samurai"
+  timeout_in: 120m
   container:
-    image: aosp/build-environment:latest # Build environment
+    image: aosp/build-environment:latest
     cpu: 8
     memory: 16G
 
   sync_script:
     - mkdir -p ~/rom && cd ~/rom
-    - repo init --depth=1 -u https://github.com/Evolution-X/manifest -b udc # Minimal History
-    - repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags # Fast & Slim Sync
+    - repo init --depth=1 -u https://github.com/Evolution-X/manifest -b udc
+    - repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+  clone_script:
+    - cd ~/rom
+    # Device Tree (Apnar Samurai Tree)
+    - git clone --depth=1 https://github.com/samurai-minhaz/android_device_realme_samurai -b sixteen device/realme/samurai
+    # Vendor Tree (Ekhane link bosiye nin)
+    - git clone --depth=1 https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b sixteen vendor/realme/samurai
+    # Kernel Tree (Ekhane link bosiye nin)
+    - git clone --depth=1 https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b sixteen kernel/realme/samurai
+
+  build_script:
+    - cd ~/rom
+    - source build/envsetup.sh
+    - lunch evolution_samurai-userdebug
+    - mka bacon -j$(nproc --all)
+
+  upload_script:
+    - echo "Build Complete! Zip file is in out/target/product/samurai/"
