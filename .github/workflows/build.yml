@@ -46,10 +46,20 @@ jobs:
       - name: Run Build
         run: |
           echo "Starting stable build for Realme X2 Pro..."
-          # এখানে পরবর্তীতে পূর্ণাঙ্গ সোর্স সিঙ্ক এবং বিল্ড কমান্ড যোগ করতে হবে
-          # উদাহরণ:
-          # repo init -u https://github.com/Evolution-X/manifest -b udc
-          # repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
-          # source build/envsetup.sh
-          # lunch evolution_samurai-userdebug
-          # mka bacon
+          
+          # ১. Repo টুল সেটআপ
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          export PATH=~/bin:$PATH
+
+          # ২. Evolution X সোর্স ইনিশিয়ালাইজ (অ্যান্ড্রয়েড ১৬ এর জন্য ব্রাঞ্চ আপডেট হতে পারে)
+          repo init -u https://github.com/Evolution-X/manifest -b udc --depth=1
+
+          # ৩. সোর্স সিঙ্ক (এটি অনেক সময় নেবে)
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+          # ৪. বিল্ড শুরু
+          source build/envsetup.sh
+          lunch evolution_samurai-userdebug
+          mka bacon
