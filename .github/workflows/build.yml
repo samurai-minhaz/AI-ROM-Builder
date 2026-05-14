@@ -9,31 +9,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Crave CLI Install kora
       - name: Install Crave CLI
         run: |
           curl -s https://raw.githubusercontent.com/accupara/crave/master/get_crave.sh | bash
           sudo install crave /usr/local/bin
 
-      # Secret theke config file banano
       - name: Configure Crave
         run: |
           mkdir -p ~/.crave
+          # Secret theke config file create kora
           echo "${{ secrets.CRAVE_CONF }}" > ~/.crave/crave.conf
+          # Current directory-te config file-er copy rakha
+          echo "${{ secrets.CRAVE_CONF }}" > .crave.conf
 
-      # Crave-e Build Run kora
       - name: Run Build on Crave
         run: |
-          crave run -- "
-            # 1. Repo Setup
-            repo init -u https://github.com/Evolution-X/manifest -b bq2 --git-lfs;
+          # --no-patch flag bebohar kora hoyeche jate current repo URL niye jhamela na kore
+          crave run --no-patch -- "
+            # 1. Purono junk clean kora (Jodi thake)
+            rm -rf .repo/local_manifests;
             
-            # 2. Local Manifest/Trees Clone (Crave server-e)
+            # 2. Repo Init (BQ2 branch onujayi)
+            repo init -u https://github.com/Evolution-X/manifest -b bq2 --depth=1 --git-lfs;
+            
+            # 3. Samurai (Realme X2 Pro) Trees Clone
             git clone https://github.com/samurai-minhaz/android_device_realme_samurai -b main device/realme/samurai;
             git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai;
             git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150;
 
-            # 3. Sync and Build
+            # 4. Sync and Build
             repo sync -c -j\$(nproc --all) --force-sync --no-clone-bundle --no-tags;
             source build/envsetup.sh;
             lunch evolution_samurai-userdebug;
