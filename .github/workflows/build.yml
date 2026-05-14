@@ -25,20 +25,20 @@ jobs:
 
       - name: Run Build on Crave
         run: |
-          # --no-patch use kora hoyeche jate current repo URL niye jhamela na hoy
-          crave run --no-patch -c $HOME/crave.conf -- "
-            # 1. Clean up
+          # --project flag-e amra "LOS 22.1" ba dashboard-e thaka jekono complete project-er nam use korbo
+          crave run --no-patch --project "LOS 22.1" -c $HOME/crave.conf -- "
+            # 1. Clean
             rm -rf .repo/local_manifests;
             
-            # 2. Repo Init for Evolution X Android 16
+            # 2. Repo Init (Evolution X Android 16)
             repo init -u https://github.com/Evolution-X/manifest -b bq2 --depth=1 --git-lfs;
             
-            # 3. Clone Samurai (Realme X2 Pro) Trees
+            # 3. Clone Trees for Samurai (Realme X2 Pro)
             git clone https://github.com/samurai-minhaz/android_device_realme_samurai -b main device/realme/samurai;
             git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai;
             git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150;
 
-            # 4. Sync and Build Start
+            # 4. Sync & Build
             repo sync -c -j\$(nproc --all) --force-sync --no-clone-bundle --no-tags;
             source build/envsetup.sh;
             lunch evolution_samurai-userdebug;
