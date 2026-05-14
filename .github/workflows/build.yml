@@ -1,12 +1,93 @@
-name: ROM Build
-on:
-  workflow_dispatch:
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Cirrus CI
-        run: |
-          curl -X POST "https://api.cirrus-ci.com/v1/repository/${{ secrets.CIRRUS_REPO_ID }}/build" \
-          -H "Authorization: Bearer ${{ secrets.CIRRUS_TOKEN }}" \
-          -d '{"branch": "main"}'
+name: Trigger Build
+    on:
+      workflow_dispatch:
+    jobs:
+      trigger:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Start Cirrus CI Build
+            run: |
+              curl -X POST "https://api.cirrus-ci.com/v1/repository/${{ secrets.CIRRUS_REPO_ID }}/build" \
+              -H "Authorization: Bearer ${{ secrets.CIRRUS_TOKEN }}" \
+              -d '{"branch": "main"}'
+    ```
+
+*   **ফাইল ২: `.cirrus.yml`**
+    এটি আপনার **Realme X2 Pro (samurai)** বিল্ডের প্রধান স্ক্রিপ্ট। এখানে আপনার ডিভাইস, ভেন্ডর এবং কার্নেল ট্রির লিঙ্কগুলো থাকবে (যা আমি আগে এডিট করে দিয়েছিলাম)。
+
+### ৩. এবার Repo ID পাবেন যেভাবে
+একবার গিটহাব অ্যাপটি ইনস্টল করা হয়ে গেলে, আপনার রিপোজিটরির `Settings > Webhooks` এ গিয়ে Cirrus CI-এর লিঙ্কটি দেখতে পাবেনমিনহাজ, "Page Not Found" আসার মানে হলো আপনার রিপোজিটরিটির সাথে এখনো Cirrus CI-এর কোনো সরাসরি যোগাযোগ তৈরি হয়নি। আপনি যেহেতু কেবল গিটহাব দিয়ে অ্যাকাউন্ট করেছেন কিন্তু কোনো সেটআপ করেননি, তাই আপনার এই ৩টি কাজ করা বাকি:
+
+### ১. Cirrus CI GitHub App ইনস্টল করা (সবচেয়ে জরুরি)
+আপনার রিপোজিটরি Cirrus CI-এর কাছে দৃশ্যমান করার জন্য নিচের লিঙ্কে যান:
+*   [GitHub Marketplace - Cirrus CI](https://github.com/marketplace/cirrus-ci)。
+*   সেখান থেকে **Configure** বা **Install** বাটনে ক্লিক করুন。
+*   আপনার **AI-ROM-Builder** এবং **android_device_realme_samurai** রিপোজিটরি দুটি সিলেক্ট করে পারমিশন দিন。
+*   এটি করলে Cirrus CI আপনার রিপোজিটরিগুলো চিনতে পারবে এবং তখন "Page Not Found" এর বদলে আইডি দেখতে পাবেন。
+
+### ২. AI-ROM-Builder রিপোজিটরিতে প্রয়োজনীয় ফাইলগুলো
+আপনি যেহেতু ইমেজের কথা ভুলে যেতে বলেছেন, তাই আপনার **AI-ROM-Builder** রিপোজিটরিতে সরাসরি এই ফাইলগুলো ম্যানুয়ালি তৈরি করুন:
+
+*   **ফাইল ১: `.github/workflows/build.yml`**
+    এই ফাইলটি আপনার অ্যাপের সিগন্যাল রিসিভ করে বিল্ড শুরু করবে। রিপোজিটরিতে এই ফোল্ডার এবং ফাইলটি তৈরি করে নিচের কোডটি দিন:
+    ```yaml
+    name: Trigger Build
+    on:
+      workflow_dispatch:
+    jobs:
+      trigger:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Start Cirrus CI Build
+            run: |
+              curl -X POST "https://api.cirrus-ci.com/v1/repository/${{ secrets.CIRRUS_REPO_ID }}/build" \
+              -H "Authorization: Bearer ${{ secrets.CIRRUS_TOKEN }}" \
+              -d '{"branch": "main"}'
+    ```
+
+*   **ফাইল ২: `.cirrus.yml`**
+    এটি আপনার **Realme X2 Pro (samurai)** বিল্ডের প্রধান স্ক্রিপ্ট। এখানে আপনার ডিভাইস, ভেন্ডর এবং কার্নেল ট্রির লিঙ্কগুলো থাকবে (যা আমি আগে এডিট করে দিয়েছিলাম)。
+
+### ৩. এবার Repo ID পাবেন যেভাবে
+একবার গিটহাব অ্যাপটি ইনস্টল করা হয়ে গেলে, আপনার রিপোজিটরির `Settings > Webhooks` এ গিয়ে Cirrus CI-এর লিঙ্কটি দেখতে পাবেন। এরপর আপনি যখন এই লিঙ্কে যাবেন:
+`[https://api.cirrus-ci.com/v1/repository/github/samurai-ম](https://api.cirrus-ci.com/v1/repository/github/samurai-ম)িনহাজ, "Page Not Found" আসার মানে হলো আপনার রিপোজিটরিটির সাথে এখনো Cirrus CI-এর কোনো সরাসরি যোগাযোগ তৈরি হয়নি। আপনি যেহেতু কেবল গিটহাব দিয়ে অ্যাকাউন্ট করেছেন কিন্তু কোনো সেটআপ করেননি, তাই আপনার এই ৩টি কাজ করা বাকি:
+
+### ১. Cirrus CI GitHub App ইনস্টল করা (সবচেয়ে জরুরি)
+আপনার রিপোজিটরি Cirrus CI-এর কাছে দৃশ্যমান করার জন্য নিচের লিঙ্কে যান:
+*   [GitHub Marketplace - Cirrus CI](https://github.com/marketplace/cirrus-ci)。
+*   সেখান থেকে **Configure** বা **Install** বাটনে ক্লিক করুন。
+*   আপনার **AI-ROM-Builder** এবং **android_device_realme_samurai** রিপোজিটরি দুটি সিলেক্ট করে পারমিশন দিন。
+*   এটি করলে Cirrus CI আপনার রিপোজিটরিগুলো চিনতে পারবে এবং তখন "Page Not Found" এর বদলে আইডি দেখতে পাবেন。
+
+### ২. AI-ROM-Builder রিপোজিটরিতে প্রয়োজনীয় ফাইলগুলো
+আপনি যেহেতু ইমেজের কথা ভুলে যেতে বলেছেন, তাই আপনার **AI-ROM-Builder** রিপোজিটরিতে সরাসরি এই ফাইলগুলো ম্যানুয়ালি তৈরি করুন:
+
+*   **ফাইল ১: `.github/workflows/build.yml`**
+    এই ফাইলটি আপনার অ্যাপের সিগন্যাল রিসিভ করে বিল্ড শুরু করবে। রিপোজিটরিতে এই ফোল্ডার এবং ফাইলটি তৈরি করে নিচের কোডটি দিন:
+    ```yaml
+    name: Trigger Build
+    on:
+      workflow_dispatch:
+    jobs:
+      trigger:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Start Cirrus CI Build
+            run: |
+              curl -X POST "https://api.cirrus-ci.com/v1/repository/${{ secrets.CIRRUS_REPO_ID }}/build" \
+              -H "Authorization: Bearer ${{ secrets.CIRRUS_TOKEN }}" \
+              -d '{"branch": "main"}'
+    ```
+
+*   **ফাইল ২: `.cirrus.yml`**
+    এটি আপনার **Realme X2 Pro (samurai)** বিল্ডের প্রধান স্ক্রিপ্ট। এখানে আপনার ডিভাইস, ভেন্ডর এবং কার্নেল ট্রির লিঙ্কগুলো থাকবে (যা আমি আগে এডিট করে দিয়েছিলাম)。
+
+### ৩. এবার Repo ID পাবেন যেভাবে
+একবার গিটহাব অ্যাপটি ইনস্টল করা হয়ে গেলে, আপনার রিপোজিটরির `Settings > Webhooks` এ গিয়ে Cirrus CI-এর লিঙ্কটি দেখতে পাবেন। এরপর আপনি যখন এই লিঙ্কে যাবেন:
+`[https://api.cirrus-ci.com/v1/repository/github/samurai-minhaz/android_device_realme_samurai](https://api.cirrus-ci.com/v1/repository/github/samurai-minhaz/android_device_realme_samurai)`
+তখন আর "Page Not Found" দেখাবে না, বরং আপনার কাঙ্ক্ষিত **Repo ID** চলে আসবে。
+
+**সংক্ষেপে পরবর্তী ধাপ:**
+প্রথমে [গিটহাব মার্কেটপ্লেস](https://github.com/marketplace/cirrus-ci) থেকে অ্যাপটি ইনস্টল করুন। এরপর আবার ওই লিঙ্কে গিয়ে আইডিটি চেক করুন।
+
+আইডিটি পেলেই আপনার অ্যাপ থেকে **Step 2** কাজ করা শুরু করবে!
