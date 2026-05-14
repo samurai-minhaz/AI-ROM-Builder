@@ -17,27 +17,27 @@ jobs:
       - name: Configure Crave
         run: |
           mkdir -p ~/.crave
-          # Secret theke config file create kora
+          # Secret থেকে কনফিগারেশন ফাইল তৈরি
           echo "${{ secrets.CRAVE_CONF }}" > ~/.crave/crave.conf
-          # Current directory-te config file-er copy rakha
-          echo "${{ secrets.CRAVE_CONF }}" > .crave.conf
+          # সরাসরি হোম ডিরেক্টরিতেও একটি কপি রাখা হচ্ছে নিরাপত্তার জন্য
+          echo "${{ secrets.CRAVE_CONF }}" > $HOME/crave.conf
 
       - name: Run Build on Crave
         run: |
-          # --no-patch flag bebohar kora hoyeche jate current repo URL niye jhamela na kore
-          crave run --no-patch -- "
-            # 1. Purono junk clean kora (Jodi thake)
+          # -c ফ্ল্যাগ দিয়ে সরাসরি পাফ ধরিয়ে দেওয়া হয়েছে
+          crave run --no-patch -c $HOME/crave.conf -- "
+            # ১. আগের জমানো ফাইল ক্লিন করা
             rm -rf .repo/local_manifests;
             
-            # 2. Repo Init (BQ2 branch onujayi)
+            # ২. Repo Init (BQ2 branch)
             repo init -u https://github.com/Evolution-X/manifest -b bq2 --depth=1 --git-lfs;
             
-            # 3. Samurai (Realme X2 Pro) Trees Clone
+            # ৩. Samurai (Realme X2 Pro) Trees Clone
             git clone https://github.com/samurai-minhaz/android_device_realme_samurai -b main device/realme/samurai;
             git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai;
             git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150;
 
-            # 4. Sync and Build
+            # ৪. Sync এবং Build শুরু
             repo sync -c -j\$(nproc --all) --force-sync --no-clone-bundle --no-tags;
             source build/envsetup.sh;
             lunch evolution_samurai-userdebug;
