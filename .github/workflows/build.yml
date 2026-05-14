@@ -1,4 +1,4 @@
-name: Evolution X A16 via Crave
+name: Evolution X A16 via Crave (AI Optimized)
 on:
   workflow_dispatch:
 
@@ -17,17 +17,15 @@ jobs:
       - name: Configure Crave
         run: |
           mkdir -p ~/.crave
-          # Cat method-e quote bebohar kora hoyeche jate token-er bitre '#' ba '.' thakle error na dey
           cat << 'EOF' > $HOME/crave.conf
           ${{ secrets.CRAVE_CONF }}
           EOF
           cp $HOME/crave.conf ~/.crave/crave.conf
 
-      - name: Run Build on Crave
+      - name: Run AI Optimized Build on Crave
         run: |
-          # --project flag-e amra "LOS 22.1" ba dashboard-e thaka jekono complete project-er nam use korbo
           crave run --no-patch --project "LOS 22.1" -c $HOME/crave.conf -- "
-            # 1. Clean
+            # 1. Clean environment
             rm -rf .repo/local_manifests;
             
             # 2. Repo Init (Evolution X Android 16)
@@ -38,7 +36,43 @@ jobs:
             git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai;
             git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150;
 
-            # 4. Sync & Build
+            # ==========================================================
+            # 4. AI MASTER OPTIMIZATION (Deep Scan & Edit)
+            # ==========================================================
+            echo 'Starting AI Deep Optimization for Samurai (A16)...';
+
+            # --- A. DEVICE TREE SCAN (90Hz, Touch, Vulkan, AVB) ---
+            find device/realme/samurai -type f \( -name '*.mk' -o -name '*.bp' -o -name '*.prop' \) | while read file; do
+              echo \"Optimizing \$file\";
+              echo 'ro.surface_flinger.set_idle_timer_ms=4000' >> \"\$file\";
+              echo 'ro.surface_flinger.set_touch_timer_ms=200' >> \"\$file\";
+              echo 'TARGET_USES_VULKAN := true' >> \"\$file\";
+              echo 'BOARD_AVB_ENABLE := true' >> \"\$file\";
+              echo 'BOARD_AVB_MAKE_VBMETA_IMAGE := true' >> \"\$file\";
+            done
+
+            # --- B. VENDOR TREE SCAN (BSG/LMC GCam, EIS, Hi-Fi) ---
+            find vendor/realme/samurai -type f \( -name '*.xml' -o -name '*.prop' \) | while read file; do
+              echo 'persist.vendor.camera.HAL3.enabled=1' >> \"\$file\";
+              echo 'persist.vendor.camera.eis.enable=1' >> \"\$file\";
+              echo 'persist.vendor.camera.video.eis=1' >> \"\$file\";
+              echo 'persist.vendor.camera.privapp.list=com.google.android.GoogleCamera,com.google.android.GoogleCamera.BSG' >> \"\$file\";
+              echo 'vendor.camera.aux.packagelist=com.google.android.GoogleCamera,com.google.android.GoogleCamera.BSG' >> \"\$file\";
+              echo 'persist.vendor.audio.hifi=true' >> \"\$file\";
+              echo 'ro.vendor.audio.sdk.fluencetype=none' >> \"\$file\";
+            done
+
+            # --- C. KERNEL TREE SCAN (LZ4, ZRAM, Performance) ---
+            find kernel/realme/sm8150/arch/arm64/configs -name '*defconfig' | while read config; do
+              echo 'CONFIG_ZRAM=y' >> \"\$config\";
+              echo 'CONFIG_LZ4_COMPRESSION=y' >> \"\$config\";
+              echo 'CONFIG_CPU_FREQ_GOV_PERFORMANCE=y' >> \"\$config\";
+              echo 'CONFIG_THERMAL_GOVERNOR_STEP_WISE=y' >> \"\$config\";
+            done
+
+            # ==========================================================
+            # 5. Sync & Build
+            # ==========================================================
             repo sync -c -j\$(nproc --all) --force-sync --no-clone-bundle --no-tags;
             source build/envsetup.sh;
             lunch evolution_samurai-userdebug;
