@@ -1,33 +1,25 @@
-env:
-  CIRRUS_CLONE_DEPTH: 1
-
 task:
-  name: "EvolutionX Build Samurai"
-  timeout_in: 120m
+  name: "Evolution X Build for Samurai"
+  timeout_in: 120m # ২ ঘণ্টা সময় (ফ্রি টায়ারে এর বেশি দেয় না)
   container:
-    image: aosp/build-environment:latest
+    image: aosp-build-image # আপনার পছন্দের বিল্ড ইমেজ
     cpu: 8
-    memory: 16G
+    memory: 32G
 
   sync_script:
-    - mkdir -p ~/rom && cd ~/rom
-    - repo init --depth=1 -u https://github.com/Evolution-X/manifest -b udc
+    - mkdir -p ~/rom
+    - cd ~/rom
+    - repo init -u https://github.com/Evolution-X/manifest -b bq2 --depth=1
     - repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-  clone_script:
+  setup_script:
     - cd ~/rom
-    # Device Tree (Apnar Samurai Tree)
-    - git clone --depth=1 https://github.com/samurai-minhaz/android_device_realme_samurai -b sixteen device/realme/samurai
-    # Vendor Tree (Ekhane link bosiye nin)
-    - git clone --depth=1 https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b sixteen vendor/realme/samurai
-    # Kernel Tree (Ekhane link bosiye nin)
-    - git clone --depth=1 https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b sixteen kernel/realme/samurai
+    - git clone https://github.com/samurai-minhaz/android_device_realme_samurai -b main device/realme/samurai
+    - git clone https://github.com/samurai-minhaz/proprietary_vendor_realme_samurai -b main vendor/realme/samurai
+    - git clone https://github.com/samurai-minhaz/android_kernel_realme_sm8150 -b main kernel/realme/sm8150
 
   build_script:
     - cd ~/rom
     - source build/envsetup.sh
     - lunch evolution_samurai-userdebug
-    - mka bacon -j$(nproc --all)
-
-  upload_script:
-    - echo "Build Complete! Zip file is in out/target/product/samurai/"
+    - m evolution
